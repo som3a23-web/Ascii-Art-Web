@@ -1,5 +1,170 @@
-.icon {
-  width: 30px;        
-  height: 30px;
 
+:root{
+  /* Primary Background */
+  --color-primary-bg: #0A0F14;
+  
+  /* Card/Panel Background */
+  --color-card-bg: #1A1F24;
+  
+  /* Input Background */
+  --color-input-bg: #2A2F34;
+  
+  /* Primary Accent (Teal) */
+  --color-accent-100: #C4E8E5;
+  --color-accent-200: #8DDDD5;
+  --color-accent-300: #56D1C5;
+  --color-accent-400: #2DB5A3;
+  --color-accent-500: #208573;
+  --color-accent-10: #E6F5F3;
+  --color-accent-50: #C4E8E580;
+  
+  /* Yellow (Terminal Dot) */
+  --color-yellow-100: #FFEDB3;
+  --color-yellow-200: #FFE380;
+  --color-yellow-300: #FFD84D;
+  --color-yellow-400: #FFBB00;
+  --color-yellow-500: #CC9500;
+  --color-yellow-10: #FFF9E6;
+  --color-yellow-50: #FFEDB380;
+  
+  /* Green (Terminal Dot) */
+  --color-green-100: #C4F5C4;
+  --color-green-200: #8FEB8F;
+  --color-green-300: #5AE15A;
+  --color-green-400: #2BC72B;
+  --color-green-500: #1F8C1F;
+  --color-green-10: #E6FAE6;
+  --color-green-50: #C4F5C480;
+  
+  /* Red (Terminal Dot) */
+  --color-red-100: #FF5252;
+  --color-red-200: #E60000;
+  
+  /* Primary Text (White) */
+  --color-text-100: #FFFFFF;
+  --color-text-200: #E0E0E0;
+  --color-text-300: #B8B8B8;
+  --color-text-400: #8A8A8A;
+  --color-text-500: #5C5C5C;
+  --color-text-10: #FFFFFF1A;
+  --color-text-50: #FFFFFF80;
+  
+  /* Muted Text (Placeholder) */
+  --color-text-muted: #6A7580;
+  
+  /* Active/Focus Border */
+  --color-border-active-100: #9FD4CE;
+  --color-border-active-200: #72C5BC;
+  --color-border-active-300: #45B6AA;
+  --color-border-active-400: #2FA593;
+  --color-border-active-500: #247A6C;
+  --color-border-active-10: #E0F2F0;
+  --color-border-active-50: #9FD4CE80;
+  
+  /* Subtle Border */
+  --color-border-subtle: #0A0F14;
+
+  --font-family-base: "Micro 5", sans-serif;
+  
+  /* Font Sizes */
+  --font-size-h1: 90px;
+  --font-size-h2: 60px;
+  --font-size-h3: 50px;
+  --font-size-button: 36px;
+  --font-size-body: 24px;
+  --font-size-caption: 18px;
+  --font-size-small: 14px;
+  
+  /* Line Heights */
+  --line-height-auto: auto;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+
+body{
+  min-height: 100vh;
+  line-height: 1.6;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-body);
+  line-height: var(--line-height-auto);
+  font-weight: 400;
+  background: linear-gradient(135deg, var(--color-primary-bg), #12181E);
+  color: var(--color-text-100);
+}
+
+.container{
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header{
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.header h1{
+  font-size: var(--font-size-h1);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg,rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 50%, rgba(122, 144, 207, 1) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  text-shadow: none;
+  color: transparent;
+  letter-spacing: 2px;
+}
+
+.header p{
+  font-size: var(--font-size-body);
+  color: var(--color-text-muted);
+}
+
+.terminal-header{
+  background-color: var(--color-input-bg);
+  padding: 10px;
+  border-radius: 5px;
+  border : 0.8px solid var(--color-border-active-300);
+  box-shadow: 0 4px 6px rgba(28, 207, 220, 0.1); 
+  color: var(--color-text-200);
+  display: inline-block;
+  margin-top: 20px;
+  position: relative;
+   /* Core Glass Styles */
+  backdrop-filter: blur(10px); /* The frosted effect */
+  -webkit-backdrop-filter: blur(10px); /* Safari support */
+
+  /* Border & Shadow */
+  border: 1px solid var(--color-border-active-300); /* Semi-transparent border */
+  box-shadow: 0 2px 25px 0 hsla(189, 84%, 44%, 0.2);
+
+}
+.terminal-header .terminal-dollar{
+  color: var(--color-accent-500)
+}
+
+.terminal-header .terminal-prompt{
+  color: var(--color-text-300);
+}
+
+.terminal-header .cursor{
+  display: inline-block;
+  width: 8px;
+  height: 20px;
+  background-color: var(--color-green-100);
+  margin-left: 8px;
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  50% {
+    background-color: transparent;
+  }
 }
