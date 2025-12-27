@@ -1,4 +1,12 @@
-
+/* vt323-latin-400-normal */
+@font-face {
+  font-family: 'VT323';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/vt323@latest/latin-400-normal.woff2) format('woff2'), url(https://cdn.jsdelivr.net/fontsource/fonts/vt323@latest/latin-400-normal.woff) format('woff');
+  unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
 :root{
   /* Primary Background */
   --color-primary-bg: #0A0F14;
@@ -64,13 +72,13 @@
   /* Subtle Border */
   --color-border-subtle: #0A0F14;
 
-  --font-family-base: "Micro 5", sans-serif;
+  --font-family-base: VT323, monospace;
   
   /* Font Sizes */
   --font-size-h1: 90px;
-  --font-size-h2: 60px;
-  --font-size-h3: 50px;
-  --font-size-button: 36px;
+  --font-size-h2: 50px;
+  --font-size-h3: 40px;
+  --font-size-button: 32px;
   --font-size-body: 24px;
   --font-size-caption: 18px;
   --font-size-small: 14px;
@@ -124,25 +132,28 @@ body{
 
 .header p{
   font-size: var(--font-size-body);
+  font-family: VT323, monospace;
   color: var(--color-text-muted);
 }
 
 .terminal-header{
   background-color: var(--color-input-bg);
-  padding: 10px;
+  min-width: fit-content;
+  padding: 10px 20px;
   border-radius: 5px;
   border : 0.8px solid var(--color-border-active-300);
   box-shadow: 0 4px 6px rgba(28, 207, 220, 0.1); 
   color: var(--color-text-200);
   display: inline-block;
   margin-top: 20px;
+  font-family: VT323, monospace;
   position: relative;
-   /* Core Glass Styles */
-  backdrop-filter: blur(10px); /* The frosted effect */
-  -webkit-backdrop-filter: blur(10px); /* Safari support */
-
-  /* Border & Shadow */
-  border: 1px solid var(--color-border-active-300); /* Semi-transparent border */
+  background: rgba(16, 51, 60, 0.26);
+border-radius: 16px;
+box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+backdrop-filter: blur(8.7px);
+-webkit-backdrop-filter: blur(8.7px);
+  border: 1px solid var(--color-border-active-300);
   box-shadow: 0 2px 25px 0 hsla(189, 84%, 44%, 0.2);
 
 }
