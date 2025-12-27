@@ -316,7 +316,7 @@ form .banner-container .banner {
 }
 .banner-icon .third-icon {
   color: var(--color-accent-100);
-} 
+}
 
 .banner-name {
   font-weight: 600;
@@ -336,27 +336,69 @@ form .banner-container .banner {
   line-height: 1.2;
   white-space: pre;
 }
+
 .button-container {
   display: flex;
-  justify-content: space-between;
+  flex-direction: row;
+  justify-content:center;
   align-items: justify;
+  gap: 6px;
+ 
 }
 
-.button-container button {
-  background-color: var(--color-accent-400);
+.button-container .submit-btn {
+  background-color: var(--color-accent-500);
   font-family: "VT323", monospace;
   color: var(--color-text-100);
-  border: none;
   border-radius: 8px;
+  border: none;
   padding: 12px 24px;
   font-size: var(--font-size-button);
   font-weight: 600;
+  width: 80%;
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
+
+.button-container .reset-btn {
+  background-color: var(--color-border-active-300);
+  font-family: "VT323", monospace;
+  color: var(--color-text-100);
+  border-radius: 8px;
+  border: none;
+  padding: 12px 24px;
+  font-size: var(--font-size-button);
+  font-weight: 600;
+  width: 20%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+} 
+
+.button-container .submit-btn:disabled {
+  background-color: var(--color-border-active-500);
+  cursor:not-allowed;
+}
+
 .button-container button:hover {
   background-color: var(--color-accent-300);
 }
+
+footer{
+  text-align: center;
+  margin-top: 40px;
+  font-size: var(--font-size-small);
+  color: var(--color-text-300);
+}
+
+footer h3{
+  margin-bottom: 0.5rem;
+}
+
+footer p{
+  color: var(--color-text-muted);
+}
+
+
 
 @media (max-width: 640px) {
   .container {
