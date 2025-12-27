@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Micro+5&display=swap" rel="stylesheet">
 </head>
-<body class="bg-primary text-primary">
+<body class="bg-primary text-primary bg-pan-bottom">
     <div class="container">
         <main class="">
             <header class="header">
@@ -19,34 +19,73 @@
                 <p>Turn your text into stunning ASCII art using Go</p>
                 <div class="terminal-header"><span class="terminal-dollar">$</span> <span class="terminal-prompt">go run . --style=awesome</span><span class="cursor"></span></div>
             </header>
-            <section>
-                <form action="main.go ">
-                    <label for="input">ENTER YOUR TEXT</label>
-                    <input type="text" id="input" placeholder="Write any text">
-                    <p>BANNER STYLE</p>
-                    <div class="BANNER">
-                        <h2>Standard</h2>
-                        <p>Classic ASCII style</p>
-                        <p># A B C</p>
-                        <input type="checkbox" clsss="checkbox" checked>
-                        
+            <main class="main-card">
+                <form action="/ascii-art" method="POST" class="form-card">
+                    <div class="form-group">
+                    <label>
+                        Enter Your Text <span>(supports multiple lines)</span>
+                    </label>
+                    <div class="textarea-wrapper">
+                        <textarea 
+                            class="textarea" 
+                            name="text" 
+                            placeholder="Type your message here..."
+                            maxlength="500"
+                        ></textarea>
                     </div>
-                    <div class="BANNER">
-                        <h2>Shadow</h2>
-                        <p>Bold shadow effect</p>
-                        <p>▓ ▒ ░</p>
-                        <input type="checkbox" clsss="checkbox">
+                </div>
+                    <!-- Banner Selection -->
+                <div class="form-group">
+                    <label class="form-label">Select Banner Style</label>
+                    <div class="banner-grid">
+                        <!-- Standard -->
+                        <div class="banner-option">
+                            <input type="radio" name="banner" value="standard" checked>
+                            <div class="banner-card">
+                                <div class="banner-icon"># A B C</div>
+                                <div class="banner-name">Standard</div>
+                                <div class="banner-desc">Classic ASCII style</div>
+                                <div class="banner-preview"> _    
+| |__ 
+|  _ \
+|_| |_|</div>
+                            </div>
+                        </div>
+
+                        <!-- Shadow -->
+                        <div class="banner-option">
+                            <input type="radio" name="banner" value="shadow">
+                            <div class="banner-card">
+                                <div class="banner-icon"><span class="first-icon">▓</span> <span class="second-icon">▒</span> <span class="third-icon">░</span></div>
+                                <div class="banner-name">Shadow</div>
+                                <div class="banner-desc">Bold with depth</div>
+                                <div class="banner-preview">      
+_|    
+_|    
+_|_|_|</div>
+                            </div>
+                        </div>
+
+                        <!-- Thinkertoy -->
+                        <div class="banner-option">
+                            <input type="radio" name="banner" value="thinkertoy">
+                            <div class="banner-card">
+                                <div class="banner-icon">o-o O-O</div>
+                                <div class="banner-name">Thinkertoy</div>
+                                <div class="banner-desc">Minimal dots & lines</div>
+                                <div class="banner-preview">    
+o        
+|}----o
+o    |</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="BANNER">
-                        <h2>Thinkertoy</h2>
-                        <p>Playful and light</p>
-                        <p>o-o O-O</p>
-                        <input type="checkbox" clsss="checkbox" >
-        </div>
-        <button type="reset" id="reset">Reset form</button>
-        <button type="submit" id="submit">GENERATE ASCII ART</button>
-    </form>
-</section>
+                    <div class="button-container">
+                        <button type="reset" id="reset">Reset form</button>
+                        <button type="submit" id="submit">GENERATE ASCII ART</button>
+                    </div>
+                </form>
+    </main>
 <section>
     <h3>OUTPUT</h3>
     <p>ascii-output.txt</p>
