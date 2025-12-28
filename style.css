@@ -497,6 +497,14 @@ section .info{
   animation: fadeIn 0.6s ease-out 0.5s both;
 }
 
+section .info:hover{
+  border-color: var(--color-accent-400);
+  box-shadow: 0 0 15px hsla(170, 80%, 50%, 0.2);
+  transform: translateY(10px);
+  transform: translateZ(10px);
+  transition: all 0.3s ease;
+}
+
 section .info h2{
   margin-bottom: 8px;
   color: var(--color-accent-400);
