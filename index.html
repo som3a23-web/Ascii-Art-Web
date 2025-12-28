@@ -13,7 +13,7 @@
 </head>
 <body class="bg-primary text-primary bg-pan-bottom">
     <div class="container">
-        <main class="">
+        <main>
             <header class="header">
                 <h1>ASCII ART WEB</h1>
                 <p>Turn your text into stunning ASCII art using Go</p>
@@ -82,32 +82,38 @@ o    |</div>
                     </div>
                     <div class="button-container">
                         <button type="reset" id="reset" class="reset-btn">Reset form</button>
-                        <button type="submit" id="submit" class="submit-btn" disabled>GENERATE ASCII ART</button>
+                        <button type="submit" id="submit" class="submit-btn" >GENERATE ASCII ART</button>
                     </div>
                 </form>
-    </main>
-<section>
-    <h3>OUTPUT</h3>
-    <p>ascii-output.txt</p>
-    
-    <div id="server-data-container">
-        <h3>Your ASCII art will appear here</h3>
-        <p>Enter text and click Generate</p>
-        </div>
-    </section>
-    <section>
+            </main>
+            <h2 class="output-title">OUTPUT</h2>
+            <section class="output-section">
+                <div class="title-output">
+                    <span class="red"></span>
+                    <span class="yellow"></span>
+                    <span class="green"></span>
+                    <span class="title">ascii-output.txt</span>
+                </div>
+                <div id="server-data-container">
+                    <div class="ascii-art-output">
+                        <h3>Your ASCII art will appear here</h3>
+                        <p>Enter text and click Generate</p>
+                    </div>
+                </div>
+            </section>
+    <section class="info-section">
         <div class="info">
             <h2>Go Powered</h2>
             <p>Built with Go for speed and reliability</p>
-    </div>
-    <div class="info">
-        <h2>3 Banner Styles</h2>
-        <p>Standard, Shadow, and Thinkertoy</p>
-    </div>
-    <div class="info">
-        <h2>Instant Results</h2>
-        <p>Get your ASCII art in milliseconds</p>
-    </div>
+        </div>
+        <div class="info">
+            <h2>3 Banner Styles</h2>
+            <p>Standard, Shadow, and Thinkertoy</p>
+        </div>
+        <div class="info">
+            <h2>Instant Results</h2>
+            <p>Get your ASCII art in milliseconds</p>
+        </div>
 </section>
 </main>
 <footer>
