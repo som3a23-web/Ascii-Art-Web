@@ -10,6 +10,8 @@ import (
 
 var tmpl *template.Template
 var notFoundTmpl *template.Template
+var internalErrorTmpl *template.Template
+var badRequestTmpl *template.Template
 
 type PageData struct {
 	Input  string
@@ -28,6 +30,16 @@ func init() {
 	notFoundTmpl, err = template.ParseFiles("./template/404.html")
 	if err != nil {
 		log.Fatal("Could not pre-parse 404 template: ", err)
+	}
+	// Parse 500 template
+	internalErrorTmpl, err = template.ParseFiles("./template/500.html")
+	if err != nil {
+		log.Fatal("Could not pre-parse 500 template: ", err)
+	}
+	// Parse 400 template
+	badRequestTmpl, err = template.ParseFiles("./template/400.html")
+	if err != nil {
+		log.Fatal("Could not pre-parse 400 template: ", err)
 	}
 }
 
@@ -53,49 +65,47 @@ func asciiHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.Body = http.MaxBytesReader(w, r.Body, 10240)
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "413 Request Entity Too Large", http.StatusRequestEntityTooLarge)
-		return
-	}
-
 	inputStr := r.FormValue("text")
 	banner := r.FormValue("banner")
+	var output string
 
-	if inputStr == "" || banner == "" {
-		http.Error(w, "400 Bad Request: Missing text or banner", http.StatusBadRequest)
-		return
-	}
+	if inputStr != "" || banner != "" {
 
-	if !isValidBanner(banner) {
-		http.Error(w, "400 Bad Request: Invalid banner", http.StatusBadRequest)
-		return
-	}
+		if !isValidBanner(banner) {
+			w.WriteHeader(http.StatusBadRequest)
+			badRequestTmpl.Execute(w, nil)
+			return
+		}
 
-	if !isValidASCII(inputStr) {
-		http.Error(w, "400 Bad Request: Input contains non-ASCII characters", http.StatusBadRequest)
-		return
-	}
+		if !isValidASCII(inputStr) {
+			w.WriteHeader(http.StatusBadRequest)
+			badRequestTmpl.Execute(w, nil)
+			return
+		}
 
-	bannerData := ascii.ReadBanner(banner)
-	if bannerData == "" {
-		http.Error(w, "500 Internal Server Error: Banner file missing", http.StatusInternalServerError)
-		return
-	}
+		bannerData := ascii.ReadBanner(banner)
+		if bannerData == "" {
+			w.WriteHeader(http.StatusInternalServerError)
+			internalErrorTmpl.Execute(w, nil)
+			return
+		}
 
-	splitInput := strings.Split(strings.ReplaceAll(inputStr, "\r\n", "\n"), "\n")
-	sliceBanner := strings.Split(bannerData, "\n")
+		splitInput := strings.Split(strings.ReplaceAll(inputStr, "\r\n", "\n"), "\n")
+		sliceBanner := strings.Split(bannerData, "\n")
 
-	art, err := ascii.DrawingInput(splitInput, sliceBanner)
-	if err != nil {
-		http.Error(w, "500 Internal Server Error", http.StatusInternalServerError)
-		return
+		art, err := ascii.DrawingInput(splitInput, sliceBanner)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			internalErrorTmpl.Execute(w, nil)
+			return
+		}
+		output = art
 	}
 
 	data := PageData{
 		Input:  inputStr,
 		Banner: banner,
-		Art:    art,
+		Art:    output,
 	}
 	tmpl.Execute(w, data)
 }
