@@ -8,8 +8,8 @@
     <title>Ascii-Art-Web</title>
     <meta property="og:image" content="https://github.com/marioscordia/ascii-art-web">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Micro+5&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Micro+5&display=swap" rel="stylesheet">
 </head>
 <body class="bg-primary text-primary bg-pan-bottom">
     <div class="container">
@@ -20,13 +20,13 @@
                 <div class="terminal-header"><span class="terminal-dollar">$</span> <span class="terminal-prompt">go run . --style=awesome</span><span class="cursor"></span></div>
             </header>
             <main class="main-card">
-                <form action="/ascii-art" method="POST" class="form-card">
+                <form id="ascii-form" action="/ascii-art" method="POST" class="form-card">
                     <div class="form-group">
                     <label>
                         Enter Your Text <span>(supports multiple lines)</span>
                     </label>
                     <div class="textarea-wrapper">
-                        <textarea 
+                        <textarea
                             class="textarea" 
                             name="text" 
                             placeholder="Type your message here..."
@@ -40,7 +40,7 @@
                     <div class="banner-grid">
                         <!-- Standard -->
                         <div class="banner-option">
-                            <input type="radio" name="banner" value="standard" >
+                            <input type="radio" name="banner" value="standard" {{if eq .Banner "standard" }}checked{{end}}>
                             <div class="banner-card">
                                 <div class="banner-icon"># A B C</div>
                                 <div class="banner-name">Standard</div>
@@ -54,7 +54,7 @@
 
                         <!-- Shadow -->
                         <div class="banner-option">
-                            <input type="radio" name="banner" value="shadow">
+                            <input type="radio" name="banner" value="shadow" {{if eq .Banner "shadow" }}checked{{end}}>
                             <div class="banner-card">
                                 <div class="banner-icon"><span class="first-icon">▓</span> <span class="second-icon">▒</span> <span class="third-icon">░</span></div>
                                 <div class="banner-name">Shadow</div>
@@ -68,7 +68,7 @@ _|_|_|</div>
 
                         <!-- Thinkertoy -->
                         <div class="banner-option">
-                            <input type="radio" name="banner" value="thinkertoy">
+                            <input type="radio" name="banner" value="thinkertoy" {{if eq .Banner "thinkertoy" }}checked{{end}}>
                             <div class="banner-card">
                                 <div class="banner-icon">o-o O-O</div>
                                 <div class="banner-name">Thinkertoy</div>
@@ -82,12 +82,12 @@ o    |</div>
                     </div>
                     <div class="button-container">
                         <button type="reset" id="reset" class="reset-btn">Reset form</button>
-                        <button type="submit" id="submit" class="submit-btn" >GENERATE ASCII ART</button>
+                        <button type="submit" id="submit" class="submit-btn">GENERATE ASCII ART</button>
                     </div>
                 </form>
             </main>
             <h2 class="output-title">OUTPUT</h2>
-            <section class="output-section">
+            <section id="output-section" class="output-section">
                 <div class="title-output">
                     <span class="red"></span>
                     <span class="yellow"></span>
@@ -95,7 +95,7 @@ o    |</div>
                     <span class="title">ascii-output.txt</span>
                 </div>
                 <div id="server-data-container">
-                    <div class="ascii-art-output">
+                    <div class="ascii-art-output" id="ascii-output">
                         {{if .Art}}
                         <pre>{{.Art}}</pre>
                         {{else}}
@@ -123,9 +123,71 @@ o    |</div>
 <footer>
     <h3>Made with Go + HTML/CSS</h3>
     <p>GET / • POST /ascii-art</p>
-    
     <p>Made by Anas,Ismail,Omneya and Amr</p>
 </footer>
 </div>
+
+<script>
+document.getElementById('ascii-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submit');
+    const outputDiv = document.getElementById('ascii-output');
+    const formData = new FormData(this);
+    
+    // Disable button during submission
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'GENERATING...';
+    
+    // Show loading message
+    outputDiv.innerHTML = '<h3>Generating your ASCII art...</h3>';
+    
+    try {
+        const response = await fetch('/ascii-art', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || `HTTP error! status: ${response.status}`);
+        }
+        
+        const html = await response.text();
+        
+        // Parse the response to extract just the ASCII art
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const artContent = doc.querySelector('#ascii-output');
+        
+        if (artContent) {
+            outputDiv.innerHTML = artContent.innerHTML;
+        } else {
+            outputDiv.innerHTML = '<h3>No output generated</h3>';
+        }
+        
+        // Smooth scroll to output section
+        document.getElementById('output-section').scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'start' 
+        });
+        
+    } catch (error) {
+        outputDiv.innerHTML = `<h3 style="color: #ff5252;">Error</h3><p>${error.message}</p>`;
+    } finally {
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'GENERATE ASCII ART';
+    }
+});
+
+// Reset button handler
+document.getElementById('reset').addEventListener('click', function() {
+    document.getElementById('ascii-output').innerHTML = `
+        <h3>Your ASCII art will appear here</h3>
+        <p>Enter text and click Generate</p>
+    `;
+});
+</script>
 </body>
 </html>

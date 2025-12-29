@@ -9,6 +9,7 @@ import (
 )
 
 var tmpl *template.Template
+var notFoundTmpl *template.Template
 
 type PageData struct {
 	Input  string
@@ -22,11 +23,19 @@ func init() {
 	if err != nil {
 		log.Fatal("Could not pre-parse templates: ", err)
 	}
+
+	// Parse 404 template
+	notFoundTmpl, err = template.ParseFiles("./template/404.html")
+	if err != nil {
+		log.Fatal("Could not pre-parse 404 template: ", err)
+	}
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		http.Error(w, "404 Not Found", http.StatusNotFound)
+		// Serve custom 404 page
+		w.WriteHeader(http.StatusNotFound)
+		notFoundTmpl.Execute(w, nil)
 		return
 	}
 
@@ -95,7 +104,6 @@ func isValidBanner(banner string) bool {
 	return banner == "standard" || banner == "shadow" || banner == "thinkertoy"
 }
 
-// Helper to check for non-ASCII characters (range 32-126 + newlines)
 func isValidASCII(s string) bool {
 	for _, r := range s {
 		if (r < 32 || r > 126) && r != '\n' && r != '\r' {

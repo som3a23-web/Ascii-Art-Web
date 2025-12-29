@@ -525,7 +525,15 @@ footer p {
   color: var(--color-text-muted);
 }
 
-
+.error-image {
+  width: 100%;
+  max-width: 600px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+  animation: fadeIn 1s ease-out both;
+  
+}
 
 
 @media (max-width: 640px) {
