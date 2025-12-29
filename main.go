@@ -2,7 +2,6 @@ package main
 
 import (
 	ascii "asciiart/features"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -29,7 +28,6 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(tmpl)
 	if Input != "" && Banner != "" {
 		Args := []string{Input, Banner}
 		input, banner := ascii.StoreInputAndBanner(Args)
@@ -39,24 +37,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		art, err := ascii.DrawingInput(splitInput, sliceBanner)
 		OutPut = art
 		checkErr(err)
-		fmt.Println(art)
 	}
 	err = tmpl.Execute(w, PageData{Input: Input, Banner: Banner, Art: OutPut})
-	// bannerData := ascii.ReadBanner(banner)
-	// fmt.Println(bannerData)
-	// bannerSlice := strings.Split(bannerData, "\n")
-	// art, err := ascii.DrawingInput(splitInput, bannerSlice)
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// 	return
-	// }
-	// OutPut = art
-
-	// err = tmpl.Execute(w, PageData{Input: Input, Banner: Banner, Art: OutPut})
-	// if err != nil {
-	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-	// }
-
 }
 
 func main() {
