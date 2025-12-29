@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta property="og:title" content="Ascii-Art-Web">
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="../static/style.css">
     <title>Ascii-Art-Web</title>
     <meta property="og:image" content="https://github.com/marioscordia/ascii-art-web">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,10 +28,10 @@
                     <div class="textarea-wrapper">
                         <textarea 
                             class="textarea" 
-                            name="text" 
+                            name="textInput" 
                             placeholder="Type your message here..."
                             maxlength="500"
-                        ></textarea>
+                        >{{.Input}}</textarea>
                     </div>
                 </div>
                     <!-- Banner Selection -->
