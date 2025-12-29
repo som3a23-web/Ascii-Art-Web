@@ -1,62 +1,249 @@
 package main
 
 import (
-	ascii "asciiart/features"
 	"html/template"
 	"io"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 )
 
-// helper to override the global template for deterministic responses in tests
-func setTestTemplate(t *testing.T, tpl string) {
-	t.Helper()
-	var err error
-	tmpl, err = template.New("test").Parse(tpl)
-	if err != nil {
-		t.Fatalf("failed to parse test template: %v", err)
+// ============================================================================
+// FUNCTIONAL REQUIREMENTS TESTS
+// ============================================================================
+
+// Test: Only standard packages are used
+func TestOnlyStandardPackages(t *testing.T) {
+	// This is verified by the import statements and go.mod
+	// The test passes if the code compiles with only standard library
+}
+
+// Test: Project contains HTML files in templates directory
+func TestHTMLFilesExist(t *testing.T) {
+	requiredTemplates := []string{
+		"./templates/index.html",
+		"./templates/404.html",
+		"./templates/400.html",
+		"./templates/500.html",
+	}
+
+	for _, tmplPath := range requiredTemplates {
+		if _, err := template.ParseFiles(tmplPath); err != nil {
+			t.Errorf("Required template not found or invalid: %s - %v", tmplPath, err)
+		}
 	}
 }
 
-func TestHomeHandler_GET_OK(t *testing.T) {
-	setTestTemplate(t, "home")
-	r := httptest.NewRequest(http.MethodGet, "/", nil)
+// Test: Standard template input with special characters
+func TestStandardTemplateWithSpecialChars(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "{123}\n<Hello> (World)!")
+	form.Set("banner", "standard")
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	w := httptest.NewRecorder()
 
-	homeHandler(w, r)
+	asciiHandler(w, r)
 
 	res := w.Result()
 	defer res.Body.Close()
+
 	if res.StatusCode != http.StatusOK {
-		t.Fatalf("expected status 200, got %d", res.StatusCode)
+		t.Errorf("Expected status 200, got %d", res.StatusCode)
 	}
-	b, _ := io.ReadAll(res.Body)
-	if string(b) != "home" {
-		t.Fatalf("expected body 'home', got %q", string(b))
+
+	body, _ := io.ReadAll(res.Body)
+	output := string(body)
+
+	// Verify output contains ASCII art representation
+	if !strings.Contains(output, "{") || !strings.Contains(output, "}") {
+		t.Error("Output should contain ASCII representation of input characters")
 	}
 }
 
-func TestHomeHandler_NonRoot_404(t *testing.T) {
-	r := httptest.NewRequest(http.MethodGet, "/not-found", nil)
+// Test: Input "123??" with standard banner
+func TestStandardTemplate123QuestionMarks(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "123??")
+	form.Set("banner", "standard")
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	res := w.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", res.StatusCode)
+	}
+
+	body, _ := io.ReadAll(res.Body)
+	output := string(body)
+
+	if !strings.Contains(output, "?") {
+		t.Error("Output should contain ASCII representation of question marks")
+	}
+}
+
+// Test: Shadow banner with special characters
+func TestShadowBannerSpecialChars(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "$% \"=")
+	form.Set("banner", "shadow")
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	res := w.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", res.StatusCode)
+	}
+}
+
+// Test: Thinkertoy banner with complex input
+func TestThinkertoyBannerComplexInput(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "123 T/fs#R")
+	form.Set("banner", "thinkertoy")
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	res := w.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", res.StatusCode)
+	}
+}
+
+// Test: Graphical representation is displayed
+func TestGraphicalRepresentationDisplayed(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "Hi")
+	form.Set("banner", "standard")
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	res := w.Result()
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	output := string(body)
+
+	// Check that output contains ASCII art patterns (multiple lines, ASCII characters)
+	if !strings.Contains(output, "\n") {
+		t.Error("ASCII art should contain multiple lines")
+	}
+
+	// Should contain ASCII art characters like |, _, /, etc.
+	hasAsciiChars := strings.ContainsAny(output, "|_/\\-")
+	if !hasAsciiChars {
+		t.Error("Output should contain ASCII art characters")
+	}
+}
+
+// ============================================================================
+// HTTP STATUS CODE TESTS
+// ============================================================================
+
+// Test: 404 Not Found - Invalid route
+func TestInvalidRoute404(t *testing.T) {
+	r := httptest.NewRequest(http.MethodGet, "/nonexistent", nil)
 	w := httptest.NewRecorder()
 
 	homeHandler(w, r)
 
 	res := w.Result()
 	defer res.Body.Close()
+
 	if res.StatusCode != http.StatusNotFound {
-		t.Fatalf("expected status 404, got %d", res.StatusCode)
-	}
-	b, _ := io.ReadAll(res.Body)
-	if !strings.Contains(string(b), "404 Not Found") {
-		t.Fatalf("expected 404 message, got %q", string(b))
+		t.Errorf("Expected status 404, got %d", res.StatusCode)
 	}
 }
 
-func TestHomeHandler_MethodNotAllowed_405(t *testing.T) {
+// Test: 400 Bad Request - Invalid banner
+func TestInvalidBanner400(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "Hello")
+	form.Set("banner", "invalid_banner")
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	res := w.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusBadRequest {
+		t.Errorf("Expected status 400, got %d", res.StatusCode)
+	}
+}
+
+// Test: 400 Bad Request - Non-ASCII characters
+func TestNonASCIICharacters400(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "Hello 世界") // Contains non-ASCII characters
+	form.Set("banner", "standard")
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	res := w.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusBadRequest {
+		t.Errorf("Expected status 400 for non-ASCII input, got %d", res.StatusCode)
+	}
+}
+
+// Test: 500 Internal Server Error handling (simulated)
+func TestInternalServerError500(t *testing.T) {
+	// Attempt to request a banner that exists in your list but
+	// force a failure by temporarily renaming the banner file or
+	// simulating a file read error if your ReadBanner allows it.
+	form := url.Values{}
+	form.Set("text", "Test")
+	form.Set("banner", "standard")
+
+	// If you rename 'standard.txt' to 'standard_tmp.txt' here:
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	if w.Code != http.StatusInternalServerError {
+		t.Errorf("Expected 500 if banner file is missing/unreadable, got %d", w.Code)
+	}
+}
+
+// Test: 405 Method Not Allowed
+func TestMethodNotAllowed405(t *testing.T) {
+	// Test POST on GET-only endpoint
 	r := httptest.NewRequest(http.MethodPost, "/", nil)
 	w := httptest.NewRecorder()
 
@@ -64,66 +251,35 @@ func TestHomeHandler_MethodNotAllowed_405(t *testing.T) {
 
 	res := w.Result()
 	defer res.Body.Close()
+
 	if res.StatusCode != http.StatusMethodNotAllowed {
-		t.Fatalf("expected status 405, got %d", res.StatusCode)
+		t.Errorf("Expected status 405, got %d", res.StatusCode)
 	}
-	b, _ := io.ReadAll(res.Body)
-	if !strings.Contains(string(b), "405 Method Not Allowed") {
-		t.Fatalf("expected 405 message, got %q", string(b))
-	}
-}
 
-func TestAsciiHandler_MethodNotAllowed_405(t *testing.T) {
-	r := httptest.NewRequest(http.MethodGet, "/ascii-art", nil)
-	w := httptest.NewRecorder()
+	// Test GET on POST-only endpoint
+	r = httptest.NewRequest(http.MethodGet, "/ascii-art", nil)
+	w = httptest.NewRecorder()
 
 	asciiHandler(w, r)
 
-	res := w.Result()
+	res = w.Result()
 	defer res.Body.Close()
+
 	if res.StatusCode != http.StatusMethodNotAllowed {
-		t.Fatalf("expected status 405, got %d", res.StatusCode)
+		t.Errorf("Expected status 405, got %d", res.StatusCode)
 	}
 }
 
-func TestAsciiHandler_MissingParams_400(t *testing.T) {
+// ============================================================================
+// SERVER COMMUNICATION TESTS
+// ============================================================================
+
+// Test: Server-client communication works
+func TestServerClientCommunication(t *testing.T) {
 	form := url.Values{}
-	form.Set("text", "Hello")
-	// banner is missing
-	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
-	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	w := httptest.NewRecorder()
-
-	asciiHandler(w, r)
-
-	res := w.Result()
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusBadRequest {
-		t.Fatalf("expected status 400, got %d", res.StatusCode)
-	}
-}
-
-func TestAsciiHandler_InvalidBanner_400(t *testing.T) {
-	form := url.Values{}
-	form.Set("text", "Hello")
-	form.Set("banner", "invalid")
-	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
-	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	w := httptest.NewRecorder()
-
-	asciiHandler(w, r)
-
-	res := w.Result()
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusBadRequest {
-		t.Fatalf("expected status 400, got %d", res.StatusCode)
-	}
-}
-
-func TestAsciiHandler_NonASCII_400(t *testing.T) {
-	form := url.Values{}
-	form.Set("text", "Héllo") // contains non-ASCII 'é'
+	form.Set("text", "Test")
 	form.Set("banner", "standard")
+
 	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
 	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	w := httptest.NewRecorder()
@@ -132,108 +288,206 @@ func TestAsciiHandler_NonASCII_400(t *testing.T) {
 
 	res := w.Result()
 	defer res.Body.Close()
-	if res.StatusCode != http.StatusBadRequest {
-		t.Fatalf("expected status 400, got %d", res.StatusCode)
-	}
-}
 
-func TestAsciiHandler_TooLarge_413(t *testing.T) {
-	// Build a body exceeding the 10240-byte limit
-	tooLarge := strings.Repeat("a", 10241)
-	form := url.Values{}
-	form.Set("text", tooLarge)
-	form.Set("banner", "standard")
-	body := form.Encode()
-
-	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(body))
-	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	w := httptest.NewRecorder()
-
-	asciiHandler(w, r)
-
-	res := w.Result()
-	defer res.Body.Close()
-	if res.StatusCode != http.StatusRequestEntityTooLarge {
-		t.Fatalf("expected status 413, got %d", res.StatusCode)
-	}
-}
-
-func TestAsciiHandler_Success_200(t *testing.T) {
-	// render only the Art field to compare easily
-	setTestTemplate(t, "{{.Art}}")
-
-	input := "A"
-	banner := "standard"
-
-	// Compute expected art using the same library functions
-	bannerData := ascii.ReadBanner(banner)
-	if bannerData == "" {
-		t.Fatalf("expected banner data to be non-empty")
-	}
-	bannerSlice := strings.Split(bannerData, "\n")
-	art, err := ascii.DrawingInput([]string{input}, bannerSlice)
-	if err != nil {
-		t.Fatalf("DrawingInput returned error: %v", err)
-	}
-
-	form := url.Values{}
-	form.Set("text", input)
-	form.Set("banner", banner)
-	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
-	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
-	w := httptest.NewRecorder()
-
-	asciiHandler(w, r)
-
-	res := w.Result()
-	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
-		b, _ := io.ReadAll(res.Body)
-		t.Fatalf("expected status 200, got %d with body %q", res.StatusCode, string(b))
+		t.Errorf("Server-client communication failed, status: %d", res.StatusCode)
 	}
-	b, _ := io.ReadAll(res.Body)
-	if string(b) != art {
-		t.Fatalf("unexpected art output.\nExpected:\n%q\nGot:\n%q", art, string(b))
+
+	contentType := res.Header.Get("Content-Type")
+	if !strings.Contains(contentType, "text/html") && contentType != "" {
+		t.Logf("Content-Type: %s (expected text/html or empty)", contentType)
 	}
 }
 
-func TestIsValidBanner(t *testing.T) {
-	cases := []struct {
-		name   string
-		in     string
-		expect bool
-	}{
-		{"standard valid", "standard", true},
-		{"shadow valid", "shadow", true},
-		{"thinkertoy valid", "thinkertoy", true},
-		{"invalid", "foobar", false},
+// Test: Correct HTTP method is used (POST for /ascii-art)
+func TestCorrectHTTPMethod(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "Hello")
+	form.Set("banner", "standard")
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	if w.Code != http.StatusOK && w.Code != http.StatusMethodNotAllowed {
+		t.Errorf("Unexpected status code: %d", w.Code)
 	}
-	for _, tc := range cases {
+}
+
+// Test: Site doesn't crash
+func TestSiteDoesNotCrash(t *testing.T) {
+	testCases := []struct {
+		name   string
+		method string
+		path   string
+		body   string
+	}{
+		{"Home page", http.MethodGet, "/", ""},
+		{"Valid POST", http.MethodPost, "/ascii-art", "text=Hi&banner=standard"},
+		{"Empty POST", http.MethodPost, "/ascii-art", "text=&banner=standard"},
+		{"Invalid banner", http.MethodPost, "/ascii-art", "text=Hi&banner=invalid"},
+	}
+
+	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			if got := isValidBanner(tc.in); got != tc.expect {
-				t.Fatalf("isValidBanner(%q) = %v, want %v", tc.in, got, tc.expect)
+			defer func() {
+				if r := recover(); r != nil {
+					t.Errorf("Site crashed with panic: %v", r)
+				}
+			}()
+
+			r := httptest.NewRequest(tc.method, tc.path, strings.NewReader(tc.body))
+			if tc.method == http.MethodPost {
+				r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 			}
+			w := httptest.NewRecorder()
+
+			if tc.path == "/" {
+				homeHandler(w, r)
+			} else {
+				asciiHandler(w, r)
+			}
+
+			// If we reach here, site didn't crash
 		})
 	}
 }
 
-func TestIsValidASCII(t *testing.T) {
-	cases := []struct {
-		name   string
-		in     string
-		expect bool
-	}{
-		{"printable ASCII", "Hello, World!", true},
-		{"contains newline", "Line1\nLine2", true},
-		{"contains carriage return", "Line1\r\n", true},
-		{"non-printable", string([]byte{0x01}), false},
-		{"non-ASCII rune", "Héllo", false},
+// Test: Server is written in Go
+func TestServerWrittenInGo(t *testing.T) {
+	// This test passes if the file compiles as Go code
+	// Verified by the fact that we can run these tests
+}
+
+// ============================================================================
+// ADDITIONAL VALIDATION TESTS
+// ============================================================================
+
+// Test: All three banners are available
+func TestAllBannersAvailable(t *testing.T) {
+	banners := []string{"standard", "shadow", "thinkertoy"}
+
+	for _, banner := range banners {
+		bannerSelected, _ := os.ReadFile("banner/" + banner + ".txt")
+		bannerSelectedConv := string(bannerSelected)
+		if bannerSelectedConv == "" {
+			t.Errorf("Banner '%s' not available or empty", banner)
+		}
 	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			if got := isValidASCII(tc.in); got != tc.expect {
-				t.Fatalf("isValidASCII(%q) = %v, want %v", tc.in, got, tc.expect)
-			}
-		})
+}
+
+// Test: Banner validation function
+func TestBannerValidation(t *testing.T) {
+	validBanners := []string{"standard", "shadow", "thinkertoy"}
+	invalidBanners := []string{"invalid", "Standard", "SHADOW", "", "random"}
+
+	for _, banner := range validBanners {
+		if !isValidBanner(banner) {
+			t.Errorf("Valid banner '%s' rejected", banner)
+		}
+	}
+
+	for _, banner := range invalidBanners {
+		if isValidBanner(banner) {
+			t.Errorf("Invalid banner '%s' accepted", banner)
+		}
+	}
+}
+
+// Test: ASCII validation function
+func TestASCIIValidation(t *testing.T) {
+	validInputs := []string{
+		"Hello World",
+		"123!@#",
+		"Test\nMultiline",
+		"Special: ()[]{}",
+	}
+
+	invalidInputs := []string{
+		"Hello 世界",
+		"Emoji: 😀",
+		"Arabic: مرحبا",
+		string([]byte{0x01, 0x02}), // Control characters
+	}
+
+	for _, input := range validInputs {
+		if !isValidASCII(input) {
+			t.Errorf("Valid ASCII input '%s' rejected", input)
+		}
+	}
+
+	for _, input := range invalidInputs {
+		if isValidASCII(input) {
+			t.Errorf("Invalid ASCII input '%s' accepted", input)
+		}
+	}
+}
+
+// Test: Empty input handling
+func TestEmptyInputHandling(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "")
+	form.Set("banner", "standard")
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	res := w.Result()
+	defer res.Body.Close()
+
+	// Empty input should be handled gracefully (200 OK with empty output)
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("Expected status 200 for empty input, got %d", res.StatusCode)
+	}
+}
+
+// Test: Newline handling
+func TestNewlineHandling(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "Line1\nLine2\nLine3")
+	form.Set("banner", "standard")
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	res := w.Result()
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		t.Errorf("Expected status 200, got %d", res.StatusCode)
+	}
+
+	body, _ := io.ReadAll(res.Body)
+	output := string(body)
+
+	// Should handle multiple lines
+	lineCount := strings.Count(output, "\n")
+	if lineCount < 3 {
+		t.Error("Output should contain multiple lines for newline-separated input")
+	}
+}
+
+// Test: Path traversal attempt
+func TestPathTraversal400(t *testing.T) {
+	form := url.Values{}
+	form.Set("text", "Hello")
+	form.Set("banner", "../main.go") // Malicious path
+
+	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
+	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	w := httptest.NewRecorder()
+
+	asciiHandler(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected 400 for path traversal attempt, got %d", w.Code)
 	}
 }

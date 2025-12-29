@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -21,23 +22,23 @@ type PageData struct {
 
 func init() {
 	var err error
-	tmpl, err = template.ParseFiles("./template/index.html")
+	tmpl, err = template.ParseFiles("./templates/index.html")
 	if err != nil {
 		log.Fatal("Could not pre-parse templates: ", err)
 	}
 
 	// Parse 404 template
-	notFoundTmpl, err = template.ParseFiles("./template/404.html")
+	notFoundTmpl, err = template.ParseFiles("./templates/404.html")
 	if err != nil {
 		log.Fatal("Could not pre-parse 404 template: ", err)
 	}
 	// Parse 500 template
-	internalErrorTmpl, err = template.ParseFiles("./template/500.html")
+	internalErrorTmpl, err = template.ParseFiles("./templates/500.html")
 	if err != nil {
 		log.Fatal("Could not pre-parse 500 template: ", err)
 	}
 	// Parse 400 template
-	badRequestTmpl, err = template.ParseFiles("./template/400.html")
+	badRequestTmpl, err = template.ParseFiles("./templates/400.html")
 	if err != nil {
 		log.Fatal("Could not pre-parse 400 template: ", err)
 	}
@@ -83,15 +84,16 @@ func asciiHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		bannerData := ascii.ReadBanner(banner)
-		if bannerData == "" {
+		bannerSelected, err := os.ReadFile("banner/" + banner + ".txt")
+		bannerSelectedConv := string(bannerSelected)
+		if bannerSelectedConv == "" {
 			w.WriteHeader(http.StatusInternalServerError)
 			internalErrorTmpl.Execute(w, nil)
 			return
 		}
 
 		splitInput := strings.Split(strings.ReplaceAll(inputStr, "\r\n", "\n"), "\n")
-		sliceBanner := strings.Split(bannerData, "\n")
+		sliceBanner := strings.Split(bannerSelectedConv, "\n")
 
 		art, err := ascii.DrawingInput(splitInput, sliceBanner)
 		if err != nil {
