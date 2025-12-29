@@ -12,13 +12,14 @@ type PageData struct {
 	Body   string
 	Input  string
 	Banner string
+	Art    string
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	Input := r.FormValue("textInput")
 	Banner := r.FormValue("banner")
 
-	tmpl, err := template.ParseFiles("index.html")
+	tmpl, err := template.ParseFiles("./template/index.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -36,6 +37,13 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", homeHandler)
 	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	// stringToArt, banner := ascii.StoreInputAndBanner()
+	// bannerFile := ascii.ReadBanner(banner)
+	// bannerSlice := strings.Split(bannerFile, "\n")
+	// splitInput := strings.Split(stringToArt, "\\n")
+	// outPut := ascii.DrawingInput(splitInput, bannerSlice)
+
 }
 
 // func checkErr(err error) {
