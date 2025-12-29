@@ -1,9 +1,12 @@
 package main
 
 import (
+	ascii "asciiart/features"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type PageData struct {
@@ -13,17 +16,42 @@ type PageData struct {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	Input := r.FormValue("textInput")
+	Input := r.FormValue("text")
 	Banner := r.FormValue("banner")
+	//OutPut := ""
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+
 	tmpl, err := template.ParseFiles("./template/index.html")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = tmpl.Execute(w, PageData{Input: Input, Banner: Banner})
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	if Input != "" && Banner != "" {
+		Args := []string{Input, Banner}
+		input, banner := ascii.StoreInputAndBanner(Args)
+		splitInput := strings.Split(input, "\\n")
+		fmt.Println(splitInput)
+		fmt.Println(banner)
+		err = tmpl.Execute(w, PageData{Input: Input, Banner: Banner})
+		bannerData := ascii.ReadBanner(banner)
+		fmt.Println(bannerData)
 	}
+	// bannerSlice := strings.Split(bannerData, "\n")
+	// art, err := ascii.DrawingInput(splitInput, bannerSlice)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	// OutPut = art
+
+	// err = tmpl.Execute(w, PageData{Input: Input, Banner: Banner, Art: OutPut})
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// }
+
 }
 
 func main() {
