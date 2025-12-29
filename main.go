@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 )
 
 type PageData struct {
@@ -17,7 +18,7 @@ type PageData struct {
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	Input := r.FormValue("text")
 	Banner := r.FormValue("banner")
-	//OutPut := ""
+	OutPut := ""
 	if r.URL.Path != "/" {
 		http.NotFound(w, r)
 		return
@@ -28,16 +29,19 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	fmt.Println(tmpl)
 	if Input != "" && Banner != "" {
 		Args := []string{Input, Banner}
 		input, banner := ascii.StoreInputAndBanner(Args)
-		fmt.Println(input)
-		fmt.Println(banner)
+		splitInput := strings.Split(input, "\n")
+		bannerData := ascii.ReadBanner(banner)
+		sliceBanner := strings.Split(bannerData, "\n")
+		art, err := ascii.DrawingInput(splitInput, sliceBanner)
+		OutPut = art
+		checkErr(err)
+		fmt.Println(art)
 	}
-	// splitInput := strings.Split(input, "\n")
-	// fmt.Println(splitInput)
-	// fmt.Println(banner)
-	err = tmpl.Execute(w, PageData{Input: Input, Banner: Banner})
+	err = tmpl.Execute(w, PageData{Input: Input, Banner: Banner, Art: OutPut})
 	// bannerData := ascii.ReadBanner(banner)
 	// fmt.Println(bannerData)
 	// bannerSlice := strings.Split(bannerData, "\n")
@@ -63,8 +67,8 @@ func main() {
 
 }
 
-// func checkErr(err error) {
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-// }
+func checkErr(err error) {
+	if err != nil {
+		log.Fatal(err)
+	}
+}

@@ -1,8 +1,6 @@
 package asciiart
 
-import "log"
-
-func DrawingInput(input []string, bannerSlice []string) string {
+func DrawingInput(input []string, bannerSlice []string) (string, error) {
 	var convertedStrine string
 	for i, str := range input {
 		if str == "" && i != 0 {
@@ -11,14 +9,14 @@ func DrawingInput(input []string, bannerSlice []string) string {
 		}
 		for h := 1; h < 9; h++ {
 			for _, w := range str {
-				if w < 32 || w > 126 {
-					log.Fatalf("You Write Non-Printable Char. ")
-				}
+				// if w < 32 || w > 126 {
+				// 	log.Fatalf("You Write Non-Printable Char. ")
+				// }
 				selectChar := int((w-32))*9 + h
 				convertedStrine += bannerSlice[selectChar]
 			}
 			convertedStrine += "\n"
 		}
 	}
-	return convertedStrine
+	return convertedStrine, nil
 }
