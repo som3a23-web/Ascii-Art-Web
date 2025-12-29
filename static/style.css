@@ -109,6 +109,8 @@ body {
   color: var(--color-text-100);
 }
 
+
+
 .container {
   max-width: 960px;
   margin: 0 auto;
@@ -264,11 +266,7 @@ form .banner-container .banner {
   border-radius: 8px;
 }
 
-@media (max-width: 640px) {
-  .banner-grid {
-    grid-template-columns: 1fr;
-  }
-}
+
 
 .banner-option {
   position: relative;
@@ -536,6 +534,12 @@ footer p {
 
   .main-card {
     padding: 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .banner-grid {
+    grid-template-columns: 1fr;
   }
 }
 
