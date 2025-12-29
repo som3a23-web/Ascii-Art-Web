@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"strings"
 )
 
 type PageData struct {
@@ -32,13 +31,15 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if Input != "" && Banner != "" {
 		Args := []string{Input, Banner}
 		input, banner := ascii.StoreInputAndBanner(Args)
-		splitInput := strings.Split(input, "\\n")
-		fmt.Println(splitInput)
+		fmt.Println(input)
 		fmt.Println(banner)
-		err = tmpl.Execute(w, PageData{Input: Input, Banner: Banner})
-		bannerData := ascii.ReadBanner(banner)
-		fmt.Println(bannerData)
 	}
+	// splitInput := strings.Split(input, "\n")
+	// fmt.Println(splitInput)
+	// fmt.Println(banner)
+	err = tmpl.Execute(w, PageData{Input: Input, Banner: Banner})
+	// bannerData := ascii.ReadBanner(banner)
+	// fmt.Println(bannerData)
 	// bannerSlice := strings.Split(bannerData, "\n")
 	// art, err := ascii.DrawingInput(splitInput, bannerSlice)
 	// if err != nil {
