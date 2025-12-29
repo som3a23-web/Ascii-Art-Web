@@ -13,6 +13,7 @@ var tmpl *template.Template
 var notFoundTmpl *template.Template
 var internalErrorTmpl *template.Template
 var badRequestTmpl *template.Template
+var methodNotAllowedTmpl *template.Template
 
 type PageData struct {
 	Input  string
@@ -42,18 +43,23 @@ func init() {
 	if err != nil {
 		log.Fatal("Could not pre-parse 400 template: ", err)
 	}
+	// Parse 405 template
+	methodNotAllowedTmpl, err = template.ParseFiles("./templates/405.html")
+	if err != nil {
+		log.Fatal("Could not pre-parse 405 template: ", err)
+	}
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		// Serve custom 404 page
 		w.WriteHeader(http.StatusNotFound)
 		notFoundTmpl.Execute(w, nil)
 		return
 	}
 
 	if r.Method != http.MethodGet {
-		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		methodNotAllowedTmpl.Execute(w, nil)
 		return
 	}
 
@@ -62,7 +68,8 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 
 func asciiHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "405 Method Not Allowed", http.StatusMethodNotAllowed)
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		methodNotAllowedTmpl.Execute(w, nil)
 		return
 	}
 
