@@ -457,7 +457,7 @@ form .banner-container .banner {
 .output-section .ascii-art-output {
   width: 100%;
   height: 300px;
-  text-align: left;
+  text-align: center;
   padding: 20px;
   font-size: 0.8em;
   font-family: var(--font-family-base);
