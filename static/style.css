@@ -96,6 +96,7 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scroll-behavior: smooth;
 }
 
 body {
@@ -108,8 +109,6 @@ body {
   background: linear-gradient(135deg, var(--color-primary-bg), #12181e);
   color: var(--color-text-100);
 }
-
-
 
 .container {
   max-width: 960px;
@@ -267,8 +266,6 @@ form .banner-container .banner {
   margin-top: 20px;
   border-radius: 8px;
 }
-
-
 
 .banner-option {
   position: relative;
