@@ -98,8 +98,8 @@ func asciiHandler(w http.ResponseWriter, r *http.Request) {
 			internalErrorTmpl.Execute(w, nil)
 			return
 		}
-
-		splitInput := strings.Split(strings.ReplaceAll(inputStr, "\r\n", "\n"), "\n")
+		replaceInput := strings.ReplaceAll(inputStr, "\r\n", "\n")
+		splitInput := strings.Split(replaceInput, "\n")
 		sliceBanner := strings.Split(bannerSelectedConv, "\n")
 
 		art, err := ascii.DrawingInput(splitInput, sliceBanner)
