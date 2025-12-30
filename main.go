@@ -92,6 +92,11 @@ func asciiHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		bannerSelected, err := os.ReadFile("banner/" + banner + ".txt")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			internalErrorTmpl.Execute(w, nil)
+			return
+		}
 		bannerSelectedConv := string(bannerSelected)
 		if bannerSelectedConv == "" {
 			w.WriteHeader(http.StatusInternalServerError)
@@ -102,12 +107,7 @@ func asciiHandler(w http.ResponseWriter, r *http.Request) {
 		splitInput := strings.Split(replaceInput, "\n")
 		sliceBanner := strings.Split(bannerSelectedConv, "\n")
 
-		art, err := ascii.DrawingInput(splitInput, sliceBanner)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			internalErrorTmpl.Execute(w, nil)
-			return
-		}
+		art := ascii.DrawingInput(splitInput, sliceBanner)
 		output = art
 	}
 

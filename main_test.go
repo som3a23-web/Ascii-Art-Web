@@ -222,14 +222,19 @@ func TestNonASCIICharacters400(t *testing.T) {
 
 // Test: 500 Internal Server Error handling (simulated)
 func TestInternalServerError500(t *testing.T) {
-	// Attempt to request a banner that exists in your list but
-	// force a failure by temporarily renaming the banner file or
-	// simulating a file read error if your ReadBanner allows it.
+	// 1. Setup: Rename the real file to something else so ReadFile fails
+	err := os.Rename("banner/standard.txt", "banner/standard_backup.txt")
+	if err != nil {
+		t.Fatalf("Failed to setup test: %v", err)
+	}
+
+	// 2. Ensure the file is renamed back even if the test fails
+	defer os.Rename("banner/standard_backup.txt", "banner/standard.txt")
+
 	form := url.Values{}
 	form.Set("text", "Test")
-	form.Set("banner", "standard")
+	form.Set("banner", "standard") // This is a "valid" banner name
 
-	// If you rename 'standard.txt' to 'standard_tmp.txt' here:
 	r := httptest.NewRequest(http.MethodPost, "/ascii-art", strings.NewReader(form.Encode()))
 	r.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	w := httptest.NewRecorder()
@@ -237,7 +242,7 @@ func TestInternalServerError500(t *testing.T) {
 	asciiHandler(w, r)
 
 	if w.Code != http.StatusInternalServerError {
-		t.Errorf("Expected 500 if banner file is missing/unreadable, got %d", w.Code)
+		t.Errorf("Expected 500, got %d", w.Code)
 	}
 }
 

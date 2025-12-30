@@ -1,6 +1,6 @@
 package asciiart
 
-func DrawingInput(input []string, bannerSlice []string) (string, error) {
+func DrawingInput(input []string, bannerSlice []string) string {
 	var convertedStrine string
 	for _, str := range input {
 		if str == "" {
@@ -16,5 +16,5 @@ func DrawingInput(input []string, bannerSlice []string) (string, error) {
 			convertedStrine += "\n"
 		}
 	}
-	return convertedStrine, nil
+	return convertedStrine
 }
