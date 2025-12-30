@@ -37,7 +37,7 @@
                             name="text" 
                             placeholder="Type your message here..."
                             maxlength="500"
-                        >{{.Input}}</textarea>
+                        ></textarea>
                     </div>
                 </div>
                     <!-- Banner Selection -->
@@ -46,7 +46,7 @@
                     <div class="banner-grid">
                         <!-- Standard -->
                         <div class="banner-option">
-                            <input type="radio" name="banner" value="standard" {{if eq .Banner "standard" }}checked{{end}}>
+                            <input type="radio" name="banner" value="standard">
                             <div class="banner-card">
                                 <div class="banner-icon"># A B C</div>
                                 <div class="banner-name">Standard</div>
@@ -60,7 +60,7 @@
 
                         <!-- Shadow -->
                         <div class="banner-option">
-                            <input type="radio" name="banner" value="shadow" {{if eq .Banner "shadow" }}checked{{end}}>
+                            <input type="radio" name="banner" value="shadow">
                             <div class="banner-card">
                                 <div class="banner-icon"><span class="first-icon">▓</span> <span class="second-icon">▒</span> <span class="third-icon">░</span></div>
                                 <div class="banner-name">Shadow</div>
@@ -74,7 +74,7 @@ _|_|_|</div>
 
                         <!-- Thinkertoy -->
                         <div class="banner-option">
-                            <input type="radio" name="banner" value="thinkertoy" {{if eq .Banner "thinkertoy" }}checked{{end}}>
+                            <input type="radio" name="banner" value="thinkertoy">
                             <div class="banner-card">
                                 <div class="banner-icon">o-o O-O</div>
                                 <div class="banner-name">Thinkertoy</div>
